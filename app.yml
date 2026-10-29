@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://schemas.pennsieve.io/app-manifest/v1.json
+schemaVersion: "1.0"
+application:
+  name: iEEG Normative Abnormality
+  description: >-
+    Scores how abnormal each intracranial EEG channel's band power is against the HUP Interictal
+    iEEG Atlas (Bernabei et al. 2022, Brain; Pennsieve Discover 179): the atlas's normative
+    channels (not seizure onset zone, not resected) within RADIUS_MM in MNI space give a mean and
+    standard deviation per band, and each channel gets a z-score per band and its maximum |z|.
+    The reference spectra are computed from the atlas clips with the same code as ieeg-bandpower;
+    an atlas patient being tested is left out of its own reference.
+  type: processor
+  tags:
+    - ieeg
+    - seeg
+    - eeg
+    - electrophysiology
+    - epilepsy
+    - neuroscience
+    - normative-mapping
+    - statistics
+runtime:
+  # Loads the 317 MB atlas and computes 3431 reference spectra (~2 s); the run peaks at
+  # ~1.1 GB (cgroup, page cache included) and takes seconds (see README "Runtime").
+  cpu: 1024
+  memory: 2048
+  computeTypes:
+    - standard
+    - lambda
+  timeoutSeconds: 900
+parameters:
+  - name: RADIUS_MM
+    type: number
+    label: Neighbourhood radius (mm)
+    description: >-
+      A channel is compared with the atlas's normative channels whose MNI centroid lies within
+      this distance of its own.
+    defaultValue: 20
+    min: 1
+  - name: MIN_REFERENCE
+    type: integer
+    label: Minimum reference channels
+    description: With fewer normative channels within RADIUS_MM, the channel gets region "insufficient" and no z.
+    defaultValue: 10
+    min: 2
+  - name: FEATURE
+    type: string
+    label: Feature
+    description: >-
+      What is z-scored. norm_median: the median of the sum-normalised PSD per band (Bernabei et al.
+      2022); taylor2022: log10 band power normalised to sum to one over the bands (Taylor et al.
+      2022); log_rel_power, rel_power, log_abs_power: log10 or plain share of 1-80 Hz, log10 µV².
+    defaultValue: norm_median
+    validValues: [norm_median, taylor2022, log_rel_power, rel_power, log_abs_power]
+  - name: LEAVE_PATIENT_OUT
+    type: boolean
+    label: Leave the patient out
+    description: >-
+      A subject that is an atlas patient (sub-HUPatlas<NNN>, or an atlas_patient value in its
+      _electrodes.tsv) is compared only with the other atlas patients.
+    defaultValue: true
+  - name: EXCLUDE_IRRITATIVE
+    type: boolean
+    label: Exclude irritative zone
+    description: >-
+      Also drop atlas channels with more than 24 spikes per 24 h (the atlas's irritative zone)
+      from the normative reference, as the paper did; leaves 854 of 2626 normative channels.
+    defaultValue: false
+  - name: LABEL
+    type: string
+    label: Output folder
+    description: When set, the tables are written to OUTPUT_DIR/<LABEL>/ (for a workflow that runs this step twice).
+    defaultValue: ""
+inputs:
+  - name: features
+    description: >-
+      bandpower.csv from ieeg-bandpower (recording_id, channel, band, abs_power, rel_power,
+      norm_median) with the provenance.json beside it, which gives the spectral settings the
+      reference is computed with. Several (fan-in) are accepted.
+    mediaTypes:
+      - text/csv
+      - application/json
+    placement: subfolder
+    required: true
+  - name: reference
+    description: >-
+      The normative atlas: HUP_atlas_final.mat from Pennsieve Discover 179 (doi:10.26275/lzhy-ox20,
+      ODC-By), MATLAB 5 format with wake_clip, mni_coords, patient_no, soz_ch, resected_ch, spike_24h.
+    mediaTypes:
+      - application/x-matlab-data
+    placement: subfolder
+    required: true
+  - name: ieeg
+    description: >-
+      The ieeg-prep derivative, for the channels' coordinates (x, y, z, space in _channels.tsv;
+      MNI spaces only), their soz/resected labels (for validation.csv), atlas_patient in
+      _electrodes.tsv and recordings.csv. Without it every channel is region "unknown".
+    mediaTypes:
+      - text/tab-separated-values
+      - text/csv
+    placement: subfolder
+    required: false
+outputs:
+  - name: abnormality
+    description: >-
+      abnormality.csv (recording_id, channel, band, z, abs_z, region, n_reference),
+      channel_abnormality.csv (recording_id, channel, max_abs_z, max_band, region, n_reference),
+      validation.csv (AUC of max_abs_z for soz and resected channels, when labels are known) and
+      provenance.json. region: within-<R>mm, insufficient or unknown.
+    mediaTypes:
+      - text/csv
+      - application/json

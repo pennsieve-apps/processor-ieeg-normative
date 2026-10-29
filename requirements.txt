@@ -1,0 +1,9 @@
+# Runtime dependencies, resolved on python:3.12.15-slim-bookworm (linux/amd64).
+# SciPy reads the atlas .mat (MATLAB 5/7) and computes the reference spectra; awslambdaric
+# serves the image as a Lambda function.
+numpy==2.5.4
+scipy==1.18.1
+awslambdaric==4.2.3
+# dependencies of awslambdaric
+simplejson==4.2.0
+snapshot-restore-py==1.0.0
