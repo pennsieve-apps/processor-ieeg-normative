@@ -167,6 +167,62 @@ region-level, not channel-level, distinguishability (D_RS, an AUC); in their goo
 patients D_RS did not differ significantly from 0.5. Use `max_abs_z` as a screen, look at the
 signed per-band z in `abnormality.csv`, and do not read a low |z| as evidence of healthy tissue.
 
+### Checks that rule out a bug (`scripts/atlas_checks.py`)
+
+- **The arrays line up.** `whosmat` shows plain double matrices, not structs: `wake_clip` is
+  12000 × 3431 and every per-channel field is 3431 × 1, all read without transposing. Three
+  checks show that signals, coordinates and labels describe the same channels:
+  - signal correlation between channel pairs of a patient falls with their MNI distance
+    (Spearman ρ = −0.50 for consecutive channels, −0.39 for random pairs);
+  - `spike_24h` tracks the spectrum: log spike rate vs delta share ρ = 0.34, vs beta share
+    ρ = −0.31. Irritative channels (spike_24h > 24) have a median delta share of 0.47 against
+    0.32 for the others (rank-sum p = 2e-40);
+  - SOZ channels cluster in space: the nearest other SOZ channel lies at a median 6.2 mm, the
+    nearest non-SOZ channel at 12.6 mm.
+- **Units and filtering are the same on both sides.** The clips are in µV (median channel SD
+  33 µV). The reference and atlas patients run through ieeg-bandpower both take the "already
+  0.5–80 Hz" path, so neither is filtered twice. The pipeline AUCs equal the direct ones to
+  three decimals.
+- **Leave-one-patient-out works.** The test patient's channels are removed by `patient_no`
+  (n_reference drops; tested). The z-scores are calibrated: the median |z| of normative
+  channels is 0.73, close to the 0.67 expected for N(0, 1).
+
+**Replication grid** (AUC with max |z| / mean |z| over the five bands):
+
+| R (mm) | LOPO | Irritative zone excluded | SOZ vs all others | SOZ vs normative channels | resected SOZ vs all others |
+|---|---|---|---|---|---|
+| 20 | yes | no (default) | 0.480 / 0.488 | 0.480 / 0.489 | 0.442 / 0.435 |
+| 20 | yes | yes | 0.471 / 0.492 | 0.452 / 0.495 | 0.435 / 0.438 |
+| 30 | yes | yes | 0.496 / 0.513 | 0.480 / 0.520 | 0.457 / 0.464 |
+| 40 | yes | yes | 0.501 / 0.519 | 0.486 / 0.530 | 0.459 / 0.473 |
+| 20 | **no** | yes | 0.523 / 0.534 | **0.592 / 0.608** | 0.491 / 0.486 |
+| 30 | **no** | yes | 0.524 / 0.536 | 0.561 / 0.589 | 0.491 / 0.491 |
+
+Without leave-one-patient-out, a patient's own normative channels sit in their reference,
+which is circular. Bernabei et al. do not say whether they excluded the patient; doing so here
+moves the AUCs from about 0.5 to about 0.6. Coarser radii (30–40 mm, closer to the merged AAL
+regions) and the mean of |z| instead of the maximum each add 0.01–0.04.
+
+**Per band |z|, SOZ vs normative channels** (R = 20 mm, LOPO, two-sided rank-sum):
+- *Irritative zone excluded from the reference, as in the paper:* delta is the only band that
+  differs (median |z| 0.90 vs 0.72, p = 0.0009); alpha 0.90 vs 0.76 (p = 0.10); theta, beta and
+  gamma p ≥ 0.46.
+- *Irritative zone kept:* no band differs (p ≥ 0.11).
+- *Signed z of SOZ channels* (medians): delta +0.61, alpha −0.67, beta −0.60, gamma −0.58. Signed
+  delta z gives AUC 0.58, better than any |z| summary here. The paper reports the opposite in
+  its supplement (absolute scores beat directional ones).
+
+**How Bernabei et al. compared:** their univariate result is regional. A rank-sum test of the
+median normalised band power per AAL region and band, Bonferroni-corrected, found SOZ and
+irritative channels different from normative tissue in some neocortical regions (fusiform,
+inferior temporal, medial frontal) and **not** in mesial temporal structures. They give no
+per-band |z| statistics in the text, and say absolute band power did not discriminate. The
+strong effects they report are for coherence; that is not in this app.
+
+Conclusion: no bug was found. In this atlas, under leave-one-patient-out, single-channel
+spectral |z| is near chance. That agrees with the paper's own regional and largely negative
+univariate spectral results. The defaults stay as they are.
+
 On the demo seizure patients (Discover 530 via ieeg-prep) every channel is `unknown`: their
 electrode coordinates are in each patient's native space, not MNI (see *Limitations*).
 
