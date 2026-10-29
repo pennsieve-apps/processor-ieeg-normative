@@ -128,7 +128,7 @@ def load_table(folder: Path, exclude_iz: bool) -> RefSet:
             s = I.fnum(r.get("spike_24h"))
             irr.append(bool(np.isfinite(s) and s > IRRITATIVE_SPIKES_24H))
     if non_mni:
-        notes.append(f"{non_mni} reference channel(s) with coordinates in a non-MNI space: not used with REGION=radius")
+        notes.append(f"{non_mni} reference channel(s) with coordinates in a non-MNI space: not used with REGION_MODE=radius")
     if "patient" not in cols:
         notes.append("no patient column: the BIDS subject of recording_id is the patient")
     ref = RefSet("table", folder, np.array(rec, dtype=object), np.array(ch, dtype=object), np.array(xyz, float),

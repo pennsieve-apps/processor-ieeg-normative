@@ -42,7 +42,7 @@ or its patients' channels outside the SOZ and resection):
 
 | File | Columns |
 |---|---|
-| `reference_channels.csv` | `recording_id, channel` (the key into `features.csv`), `x, y, z, space` (MNI for `REGION=radius`), `roi` (optional), `patient` (the unit left out; default the BIDS subject), `normative` (true/false), and optionally `spike_24h` (> 24 = irritative zone) or `irritative` (true/false) |
+| `reference_channels.csv` | `recording_id, channel` (the key into `features.csv`), `x, y, z, space` (MNI for `REGION_MODE=radius`), `roi` (optional), `patient` (the unit left out; default the BIDS subject), `normative` (true/false), and optionally `spike_24h` (> 24 = irritative zone) or `irritative` (true/false) |
 | `features.csv` | the cohort's `features.csv` rows |
 | `coherence.csv` | optional: the cohort's `coherence.csv` rows, for edge-level connectivity |
 | `provenance.json` | optional: ieeg-bandpower's, so the spectral settings can be checked |
@@ -77,8 +77,8 @@ channel pair), once per spectral setting (~1.5 s), and kept in memory. Its chann
 
 | Name | Default | What it does |
 |---|---|---|
-| `REGION` | `auto` | How a channel's reference set is chosen. `radius`: normative channels whose MNI centroid is within `RADIUS_MM`. `roi`: normative channels with the same `roi` label (test `_channels.tsv` and reference). `auto`: `roi` when the test channel has a `roi` and the reference has `roi` labels, else `radius`. |
-| `RADIUS_MM` | `20` | Neighbourhood radius for `REGION=radius`. |
+| `REGION_MODE` | `auto` | How a channel's reference set is chosen. `radius`: normative channels whose MNI centroid is within `RADIUS_MM`. `roi`: normative channels with the same `roi` label (test `_channels.tsv` and reference). `auto`: `roi` when the test channel has a `roi` and the reference has `roi` labels, else `radius`. |
+| `RADIUS_MM` | `20` | Neighbourhood radius for `REGION_MODE=radius`. |
 | `MIN_REFERENCE` | `10` | Fewer reference channels than this: `region = insufficient`, no z. Also the minimum number of reference edges for an edge z. |
 | `LEAVE_PATIENT_OUT` | `true` | Reference channels of the tested patient are left out: the reference `patient` equal to the test subject, or the atlas patient (`sub-HUPatlas<NNN>`, or `atlas_patient` in `_electrodes.tsv`). |
 | `EXCLUDE_IRRITATIVE` | `true` | Drop irritative-zone channels (`spike_24h > 24`, i.e. ≥ 1 spike per hour, the paper's definition; or `irritative = true` in Format A) from the reference, as Bernabei et al. did. On the atlas this leaves 854 of 2626 normative channels. |
@@ -94,7 +94,7 @@ channel pair), once per spectral setting (~1.5 s), and kept in memory. Its chann
 
 1. **Reference** (Format A or B, above). The pool is the normative channels (`normative`; for
    the atlas `soz_ch == 0 and resected_ch == 0`), minus the irritative zone by default.
-2. **Region per test channel** (`REGION`): coordinates from `_channels.tsv` (`x, y, z` with
+2. **Region per test channel** (`REGION_MODE`): coordinates from `_channels.tsv` (`x, y, z` with
    `space` starting with `MNI`, `IXI549Space`, `ICBM` or `fsaverage`; empty `space` is taken as
    MNI with a note; any other space, e.g. ieeg-prep's `native`, counts as no coordinates), or its
    `roi`. Reference channels of the tested patient are removed (`LEAVE_PATIENT_OUT`).
@@ -104,7 +104,7 @@ channel pair), once per spectral setting (~1.5 s), and kept in memory. Its chann
    distribution of normative atlas edges between the same pair of brain regions"): the coherence
    of each test channel pair (i, j) per band against every reference edge (a, b) between two
    normative channels of one reference recording with a in the region of i and b in the region
-   of j, or the other way round (each reference edge counted once). With `REGION=roi` that is
+   of j, or the other way round (each reference edge counted once). With `REGION_MODE=roi` that is
    exactly the paper's region pair. With the default radius regions, a "region pair" is the pair
    of 20 mm neighbourhoods around the two test channels; this keeps the reference edges at about
    the test edge's length, which matters because coherence falls with distance. We chose this
@@ -131,7 +131,7 @@ and the merged-region table is not machine-readable, so by default this app uses
 neighbourhoods**: every test channel gets its own reference set, the normative channels within
 `RADIUS_MM` (default 20 mm, roughly the size of a merged AAL region) in MNI space. A site with
 its own labels (a `roi` column in both `_channels.tsv` and a Format A reference) gets
-region-based z-scores with `REGION=auto` or `roi`.
+region-based z-scores with `REGION_MODE=auto` or `roi`.
 
 Effect of the radius on the atlas (band power, leave-one-patient-out, `normpow`, then called
 `norm_median`, `MIN_REFERENCE=10`, irritative zone kept):
@@ -207,7 +207,7 @@ been run. `scripts/validate_atlas.py` still covers the band-power grid only.
 
 Atlas patients 1, 15, 29, 44 and 60 as delivered by ieeg-prep
 (`processor-ieeg-prep/data/atlas-out`), through ieeg-bandpower and ieeg-normative with default
-parameters (irritative zone excluded, `REGION=auto` → radius 20 mm, edges on). 240 channels: 203 with a
+parameters (irritative zone excluded, `REGION_MODE=auto` → radius 20 mm, edges on). 240 channels: 203 with a
 spectral score, 217 with an edge-based connectivity score (7 more through the node-strength
 fallback). Pooled AUC:
 

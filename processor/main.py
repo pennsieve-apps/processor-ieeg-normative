@@ -46,7 +46,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 TRUE = ("1", "true", "yes", "on")
 
 DEFAULTS = {
-    "RADIUS_MM": "20", "MIN_REFERENCE": "10", "REGION": "auto", "LEAVE_PATIENT_OUT": "true",
+    "RADIUS_MM": "20", "MIN_REFERENCE": "10", "REGION_MODE": "auto", "LEAVE_PATIENT_OUT": "true",
     "EXCLUDE_IRRITATIVE": "true", "SPECTRAL_FEATURES": "normpow", "EDGES": "true", "LABEL": "",
 }
 REGIONS = ("auto", "radius", "roi")
@@ -76,14 +76,14 @@ def read_params(env=os.environ) -> tuple[dict, dict, Sc.Params]:
          "exclude_iz": str(raw["EXCLUDE_IRRITATIVE"]).strip().lower() in TRUE, "label": raw["LABEL"].strip()}
     spectral = tuple(x.strip() for x in str(raw["SPECTRAL_FEATURES"]).split(",") if x.strip())
     sp = Sc.Params(radius=float(raw["RADIUS_MM"]), min_reference=int(float(raw["MIN_REFERENCE"])),
-                   region=str(raw["REGION"]).strip().lower(), edges=str(raw["EDGES"]).strip().lower() in TRUE,
+                   region=str(raw["REGION_MODE"]).strip().lower(), edges=str(raw["EDGES"]).strip().lower() in TRUE,
                    spectral=spectral)
     if sp.radius <= 0:
         raise ValueError("RADIUS_MM must be > 0")
     if sp.min_reference < 2:
         raise ValueError("MIN_REFERENCE must be >= 2")
     if sp.region not in REGIONS:
-        raise ValueError(f"REGION must be one of {', '.join(REGIONS)}")
+        raise ValueError(f"REGION_MODE must be one of {', '.join(REGIONS)}")
     if not spectral or any(x not in Sc.SPECTRAL_PREFIXES for x in spectral):
         raise ValueError(f"SPECTRAL_FEATURES: comma-separated, from {', '.join(Sc.SPECTRAL_PREFIXES)}")
     if p["label"] and not all(c.isalnum() or c in "-_" for c in p["label"]):

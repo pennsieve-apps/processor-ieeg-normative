@@ -34,7 +34,8 @@ runtime:
     - lambda
   timeoutSeconds: 900
 parameters:
-  - name: REGION
+  # Not REGION: compute nodes set REGION (the AWS region) in every step's environment.
+  - name: REGION_MODE
     type: string
     label: Region
     description: >-

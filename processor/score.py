@@ -5,9 +5,9 @@ Node features (relpow_*, normpow_*, logpow_*, coh_*, or any other feature in fea
 each test channel gets a reference set of normative channels, its *region*, and
 z = (x - mean) / sd over that set (sd with ddof 1), per feature.
 
-  region  REGION=radius: normative channels whose MNI centroid lies within RADIUS_MM.
-          REGION=roi: normative channels with the same `roi` label.
-          REGION=auto (default): roi when the test channel and the reference both have roi
+  region  REGION_MODE=radius: normative channels whose MNI centroid lies within RADIUS_MM.
+          REGION_MODE=roi: normative channels with the same `roi` label.
+          REGION_MODE=auto (default): roi when the test channel and the reference both have roi
           labels, otherwise radius.
   The tested patient's own reference channels are left out (LEAVE_PATIENT_OUT).
 

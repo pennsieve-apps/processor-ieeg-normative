@@ -254,7 +254,7 @@ def test_parameters(fixture_dir, tmp_path, monkeypatch):
     ch = table(tmp_path / "o2" / "x" / "channel_abnormality.csv")
     assert {r["spectral_max_feature"].split("_")[0] for r in ch if r["spectral_max_feature"]} == {"logpow"}
     assert {r["connectivity_source"] for r in ch if r["region"].startswith("within")} == {"node-strength"}
-    assert run(monkeypatch, fixture_dir, tmp_path / "o3", REGION="aal") == 1
+    assert run(monkeypatch, fixture_dir, tmp_path / "o3", REGION_MODE="aal") == 1
     assert run(monkeypatch, fixture_dir, tmp_path / "o4", SPECTRAL_FEATURES="coh") == 1
 
 
