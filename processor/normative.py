@@ -1,5 +1,7 @@
 """
-Neighbourhood normative z-scores and the AUC used to validate them.
+The AUC used to validate the scores, and the original single-feature neighbourhood z-score that
+scripts/validate_atlas.py and scripts/atlas_checks.py still use for the band-power grid. The app
+itself scores with processor/score.py (every feature, edges, families).
 
 Every test channel with MNI coordinates is compared with the normative atlas channels whose
 MNI centroid lies within RADIUS_MM of it (Euclidean), excluding the tested patient's own atlas

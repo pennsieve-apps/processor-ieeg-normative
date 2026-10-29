@@ -2,9 +2,12 @@ cff-version: 1.2.0
 message: If you use this app, please cite it and the works it builds on, listed under references.
 type: software
 title: iEEG Normative Abnormality
-abstract: Z-scores each intracranial EEG channel's band power against the normative channels of the HUP Interictal
-  iEEG Atlas within a radius in MNI space, with leave-one-patient-out for atlas patients, computing the reference
-  spectra with the same code as the band power step; one step of the Interictal Biomarker Mapping workflow.
+abstract: Z-scores every per-channel feature of intracranial EEG recordings (band power, coherence strength, or any
+  feature in the shared long table) against the normative channels of a supplied reference in the same region (an
+  MNI neighbourhood or a region label), and scores edge-level coherence against normative edges between the same
+  regions (Bernabei et al. 2022), with leave-one-patient-out. The reference is a feature table from any normative
+  cohort or the HUP Interictal iEEG Atlas, converted with the same feature code; one step of the Interictal
+  Biomarker Mapping workflow.
 authors:
 - name: Pennsieve (University of Pennsylvania)
 repository-code: https://github.com/pennsieve-apps/processor-ieeg-normative
