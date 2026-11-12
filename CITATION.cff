@@ -1,5 +1,6 @@
 cff-version: 1.2.0
-message: If you use this app, please cite it and the works it builds on, listed under references.
+message: >-
+  If you use this app, please cite the work it implements (preferred-citation), this release, and Pennsieve (RRID:SCR_021677); the other works it builds on are listed under references.
 type: software
 title: iEEG Normative Abnormality
 abstract: Z-scores every per-channel feature of intracranial EEG recordings (band power, coherence strength, or any
@@ -19,6 +20,42 @@ keywords:
 - epilepsy
 - normative-mapping
 - statistics
+# The work this app implements; the release report's "How to cite" puts it first.
+preferred-citation:
+  type: article
+  title: Normative intracranial EEG maps epileptogenic tissues in focal epilepsy
+  authors:
+  - family-names: Bernabei
+    given-names: John M
+  - family-names: Sinha
+    given-names: Nishant
+  - family-names: Arnold
+    given-names: T Campbell
+  - family-names: Conrad
+    given-names: Erin
+  - family-names: Ong
+    given-names: Ian
+  - family-names: Pattnaik
+    given-names: Akash R
+  - family-names: Stein
+    given-names: Joel M
+  - family-names: Shinohara
+    given-names: Russell T
+  - family-names: Lucas
+    given-names: Timothy H
+  - family-names: Bassett
+    given-names: Dani S
+  - family-names: Davis
+    given-names: Kathryn A
+  - family-names: Litt
+    given-names: Brian
+  year: 2022
+  journal: Brain
+  volume: 145
+  issue: '6'
+  start: '1949'
+  end: '1961'
+  doi: 10.1093/brain/awab480
 references:
 - type: article
   title: Normative intracranial EEG maps epileptogenic tissues in focal epilepsy
